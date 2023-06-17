@@ -8,11 +8,10 @@ export async function GET() {
         const payee = require('../../../db/payee.json');
         const payeeData = JSON.stringify(payee);
 
-        console.log(payeeData);
         return new NextResponse(payeeData);
     } catch (err) {
         console.error(err);
-        return new NextResponse('Error occurred', { status: 500 });
+        return new NextResponse('Error occurred Fetching Payee', { status: 500 });
     }
 }
 

@@ -17,6 +17,9 @@ import { TiDelete } from 'react-icons/ti'
 import { MdArrowBack } from "react-icons/md";
 import { useRouter } from 'next/navigation';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const CreateNewInvoice = () => {
     const router = useRouter();
     const [payMethod, setPayMethod] = useState('');
@@ -30,6 +33,28 @@ const CreateNewInvoice = () => {
     const { paymentTo, itemList } = state;
     const updateState = (data) => setState((state) => ({ ...state, ...data }));
 
+    const notifySuccess = (message) => toast.success(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    
+      const notifyError = (message) => toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      
     const paymentMode = (event) => {
         setPayMethod(event.target.value);
     }
@@ -175,8 +200,9 @@ const CreateNewInvoice = () => {
         </Grid>
         <Button variant="text" disableRipple startIcon={<MdArrowBack />} sx={{ position: 'absolute', top: 3, left: 3, "&:hover": { backgroundColor: 'transparent' }, }} onClick={() => { router.back() }}>
             Go Back
-        </Button>
+        </Button>        
     </Grid>
+    <ToastContainer />
     </>)
 }
 

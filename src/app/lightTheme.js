@@ -1,32 +1,11 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
-    // palette: {
-    //     mode: 'dark',
-    //     background: {
-    //         default: '#1A1A1A',
-    //         paper: '#1A1A1A'
-    //     },
-    //     text: {
-    //         primary: '#FFFFFF',
-    //         secondary: '#F0F0F0'
-    //     },
-    //     primary: {
-    //         main: '#55EFFF',
-    //         light: '#CEFFE2',
-    //         dark: '#1E90FF',
-    //         contrastText: '#330780'
-    //     },
-    //     secondary: {
-    //         main: '#C23AAD',
-    //         light: '#D7CFF3',
-    //         dark: '#B61E82',
-    //         contrastText: '#601A0A'
-    //     },
-    // },
+const lightTheme = createTheme({
     palette: {
         mode: 'light',
+
         background: {
+
             default: '#F1D4E5',
             paper: '#dbd3de'
         },
@@ -45,7 +24,7 @@ const theme = createTheme({
             light: '#D7CFF3',
             dark: '#B61E82',
             contrastText: '#601A0A'
-        },
+        }
     },
     typography: {
         fontFamily: ['Alkatra', 'cursive'].join(','),
@@ -62,4 +41,4 @@ const theme = createTheme({
     },
 });
 
-export default theme;
+export default lightTheme;
