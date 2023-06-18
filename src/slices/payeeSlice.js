@@ -1,26 +1,27 @@
 import axios from "axios";
 
-const { createSlice } = require("@reduxjs/toolkit");
+
+const { createSlice, createAsyncThunk } = require("@reduxjs/toolkit");
 
 const initialState = {
-    payee: [],
+    payees: [],
 };
+
 
 const payeeSlice = createSlice({
     name: "payee",
     initialState,
     reducers: {
         //Actions
-        payeeData: async (state) => {
+        payeeData: (state, action) => {
 
-            const payeeNames = await axios.get('/api/create/newPayee')
-            state.payee = [...payeeNames]
-            console.log(payeeNames)
+            state.payees = action.payload
         }
         //some other actions....
     },
 })
 
-export const { switchMode } = payeeSlice.actions;
+
+export const { payeeData } = payeeSlice.actions;
 
 export default payeeSlice.reducer

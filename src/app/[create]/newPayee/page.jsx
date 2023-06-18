@@ -11,11 +11,18 @@ import axios from 'axios'
 import { MdArrowBack } from "react-icons/md";
 import { useRouter } from 'next/navigation';
 
+import NavBar from '@/components/NavBar';
+import { ThemeProvider } from '@mui/material/styles';
+import { darkTheme, lightTheme } from '../../theme';
+import { CssBaseline } from '@mui/material';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from 'react-redux'
 
 const CreateNewPayee = () => {
   const router = useRouter();
+  const Mode = useSelector((state) => state.theme.Darkmode)
   const [payeeName, setPayeeName] = useState('');
   const [payeeContact, setPayeeContact] = useState('');
   const [payeeAddress, setPayeeAddress] = useState('');
@@ -96,8 +103,10 @@ const CreateNewPayee = () => {
 
   };
 
-  return (
+  return (<ThemeProvider theme={Mode ? darkTheme : lightTheme}>
+    <CssBaseline />
 
+     <NavBar />
     <Container sx={{ width: '100vw', height: '100vh', textAlign: 'center', padding: 0, paddingTop: '50px', alignItems: 'center', justifyContent: 'center' }}>
       <Typography variant="h1" sx={{ fontSize: '3rem' }}> Create New Payee </Typography>
       <Paper elevation={8} sx={{ width: '50%', height: '75%', margin: "20px auto", borderRadius: '50px', padding: '10px', display: 'flex', flexFlow: 'column', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
@@ -161,6 +170,7 @@ const CreateNewPayee = () => {
       </Button>
       <ToastContainer />
     </Container>
+  </ThemeProvider>
   )
 }
 

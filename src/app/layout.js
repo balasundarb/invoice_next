@@ -1,8 +1,6 @@
 "use client"
 import './globals.css'
 import { Inter } from 'next/font/google'
-
-// import { CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux'
 import { store } from './store'
 
@@ -23,7 +21,7 @@ export default function RootLayout({ children }) {
         <title description={metadata.description}>{metadata.title}</title>
       </head>
       <Provider store={store}>
-        {/* <CssBaseline /> */}
+
         <body className={inter.className}> {children} </body>
 
       </Provider>
