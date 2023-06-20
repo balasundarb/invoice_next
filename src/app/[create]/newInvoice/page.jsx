@@ -114,8 +114,9 @@ const CreateNewInvoice = () => {
 
             if (response.status === 200) {
                 notifySuccess("Invoice Created Sucessfully");
-                
+               
                 console.log('JSON file saved successfully');
+                
             } else {
                 notifyError('Can\'t create Invoice. Try Again Later');
                 console.error('Error saving JSON file');
