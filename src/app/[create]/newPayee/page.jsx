@@ -18,7 +18,7 @@ import { CssBaseline } from '@mui/material';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
 
 const CreateNewPayee = () => {
   const router = useRouter();

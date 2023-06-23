@@ -24,12 +24,18 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { payeeData } from '@/slices/payeeSlice';
+import { invoicesData } from '@/slices/invoicesSlice';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateNewInvoice = () => {
     const router = useRouter();
     const Mode = useSelector((state) => state.theme.Darkmode)
-    const payeesData = useSelector((state) => state.payee.payees)
+    const payeesData = useSelector((state) => state.payeeData.payees)
+    const invoices = useSelector((state) => state.invoiceData.invoices)
     const dispatch = useDispatch();
+    const currentDate = new Date();
+    const todayDate = currentDate.toLocaleDateString();
+    const billNo = Object.keys(invoices).length + 1;
     const [payMethod, setPayMethod] = useState('');
 
     useEffect(() => {
@@ -40,11 +46,16 @@ const CreateNewInvoice = () => {
             dispatch(payeeData(response.data))
         }
         fetchPayees();
+        async function fetchInvoices() {
 
-        return () => {
-            fetchPayees();
+            const response = await axios.get('/api/create/newInvoice')
+            // console.log(response.data)
+            dispatch(invoicesData(response.data))
+
         }
-    }, [payeesData])
+        fetchInvoices();
+
+    }, [])
 
     let [state, setState] = useState({
         paymentTo: '',
@@ -100,10 +111,16 @@ const CreateNewInvoice = () => {
     const updateTotalAmount = (index) => {
         itemList[index].amount = itemList[index].itemQty * itemList[index].itemRate;
     }
-
+    
     const createJsonFile = async () => {
 
-        const invoiceData = JSON.stringify({ "payMethod": payMethod, "paymentTo": paymentTo, "itemList": itemList })
+        const invoiceData = JSON.stringify({
+            "_id": uuidv4(),
+            "billNo": billNo,
+            "payMethod": payMethod, "paymentTo": paymentTo, "itemList": itemList,
+            "totalAmount": itemList.map((item) => item.amount).reduce((prev, curr) => prev + curr, 0),
+            "createdAt": todayDate
+        })
         try {
 
             const response = await axios.post('/api/create/newInvoice', invoiceData, {
@@ -114,9 +131,9 @@ const CreateNewInvoice = () => {
 
             if (response.status === 200) {
                 notifySuccess("Invoice Created Sucessfully");
-               
+                router.push('/')
                 console.log('JSON file saved successfully');
-                
+
             } else {
                 notifyError('Can\'t create Invoice. Try Again Later');
                 console.error('Error saving JSON file');
