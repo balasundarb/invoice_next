@@ -1,1 +1,1 @@
-[]
+[{"_id":"ce118718-548c-4a9b-b3ad-5d6cd811dcf2","billNo":1,"payMethod":"Cash","paymentTo":"Test1","itemList":[{"itemName":"One","itemQty":"1","itemRate":"10","amount":10}],"totalAmount":10,"createdAt":"5/7/2025"}]

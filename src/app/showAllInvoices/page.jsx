@@ -1,92 +1,121 @@
 'use client'
-import React, { useEffect } from 'react'
-import { Box } from '@mui/material'
-// import NavBar from '@/components/NavBar';
+import React from 'react'; 
 import { ThemeProvider } from '@mui/material/styles';
-import { darkTheme, lightTheme } from '../theme';
 import { CssBaseline } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { invoicesData } from '@/slices/invoicesSlice';
-
 import { DataGrid } from '@mui/x-data-grid';
-import Print from '@/components/Print';
 
-
-const columns = [
-  { field: 'billNo', headerName: 'Bill No', width: 70, hideable: false },
-  { field: 'payMethod', headerName: 'Payment Type', width: 130 },
-  { field: 'paymentTo', headerName: 'Payment To', width: 130 },
-  { field: 'itemList', headerName: 'Items', width: 130 },
-  { field: 'totalAmount', headerName: 'Total Amount', width: 130, align: 'right' },
-  { field: 'createdAt', headerName: 'Bill Date', width: 130, align: 'center' },
-  {
-    field: '_id',
-    headerName: 'Action',
-    sortable: false,
-    renderCell: (params) => {
-      const onClick = (e) => {
-        e.stopPropagation(); // don't select this row after clicking
-
-      };
-
-      return <Print key={params.id} id={params.id} />;
-    },
-  },
-];
+// Theme 
+import { DataGridContainer } from '@/components/DataGridContainer';
+import { PrintAction } from '@/components/PrintAction';
+import { useInvoiceData } from '@/lib/useInvoiceData';
+import { darkTheme, lightTheme } from '../theme';
+import { useSelector } from 'react-redux';
 
 const ShowAllInvoices = () => {
+  const darkMode = useSelector((state) => state.theme.Darkmode);
+  const { rows, loading } = useInvoiceData();
 
-  const Mode = useSelector((state) => state.theme.Darkmode)
-  const invoices = useSelector((state) => state.invoiceData.invoices)
-  const dispatch = useDispatch()
+  return (
+    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+      <CssBaseline />
+      <InvoiceDataGrid rows={rows} loading={loading} />
+    </ThemeProvider>
+  );
+};
 
-  useEffect(() => {
-    async function fetchInvoices() {
+export default ShowAllInvoices;
 
-      const response = await axios.get('/api/create/newInvoice')
-      dispatch(invoicesData(response.data))
-    }
-    fetchInvoices();
-    return () => {
-      fetchInvoices()
-    }
-  }, [])
+// Sub-components (could be moved to separate files)
+const InvoiceDataGrid = ({ rows, loading }) => (
+  <DataGridContainer>
+    <DataGrid
+      rows={rows}
+      columns={invoiceColumns}
+      loading={loading}
+      initialState={{
+        pagination: {
+          paginationModel: { page: 0, pageSize: 5 },
+        },
+      }}
+      pageSizeOptions={[5, 10]}
+      getRowId={(row) => row._id}
+      sx={{
+        '& .MuiDataGrid-cell': {
+          borderBottom: 'none',
+        },
+        '& .MuiDataGrid-columnHeaders': {
+          backgroundColor: 'background.paper',
+          borderBottom: 'none',
+        },
+      }}
+    />
+  </DataGridContainer>
+);
 
-  const row = invoices.map((row) => {
-    return {
-      _id: row._id,
-      billNo: row.billNo,
-      createdAt: row.createdAt,
-      payMethod: row.payMethod,
-      paymentTo: row.paymentTo,
-      itemList: row.itemList.map((row) => { return row.itemName }),
-      totalAmount: "₹ " + row.totalAmount,
-    }
-  })
+// Column configuration
+const invoiceColumns = [
+  { 
+    field: 'billNo', 
+    headerName: 'Bill No', 
+    width: 90,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  { 
+    field: 'payMethod', 
+    headerName: 'Payment Type', 
+    width: 130,
+    valueFormatter: (params) => formatPaymentMethod(params.value)
+  },
+  { 
+    field: 'paymentTo', 
+    headerName: 'Payee', 
+    width: 150 
+  },
+  { 
+    field: 'items', 
+    headerName: 'Items', 
+    width: 180,
+    valueFormatter: (params) => params.value.join(', ')
+  },
+  { 
+    field: 'totalAmount', 
+    headerName: 'Amount', 
+    width: 130, 
+    align: 'right',
+    headerAlign: 'right'
+  },
+  { 
+    field: 'createdAt', 
+    headerName: 'Date', 
+    width: 120,
+    valueFormatter: (params) => formatDate(params.value),
+    align: 'center',
+    headerAlign: 'center'
+  },
+  {
+    field: 'actions',
+    headerName: ' ',
+    width: 100,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+    renderCell: (params) => <PrintAction id={params.row._id} />,
+    align: 'center'
+  }
+];
 
+// Utility functions (could be moved to utils/)
+const formatPaymentMethod = (method) => {
+  const methods = {
+    cash: 'Cash',
+    card: 'Card',
+    upi: 'UPI',
+    netbanking: 'Net Banking'
+  };
+  return methods[method.toLowerCase()] || method;
+};
 
-  return (<ThemeProvider theme={Mode ? darkTheme : lightTheme}>
-    <CssBaseline />
-    <Box sx={{ width: 'auto', height: 'auto' }}>
-      {/* <NavBar /> */}
-      <Box sx={{ width: { xs: '100%', md: '100%', lg: '80%', xl: '65%' }, margin: 'auto' }}>
-
-        <DataGrid
-          rows={row}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-          pageSizeOptions={[5, 10]}
-          getRowId={(row) => row._id}
-        />
-      </Box>
-    </Box>
-  </ThemeProvider>
-  )
-}
-
-export default ShowAllInvoices
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-IN');
+};

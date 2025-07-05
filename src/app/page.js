@@ -1,69 +1,192 @@
-'use client'
-import React, { Suspense, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Typography, Button, Box } from '@mui/material';
-import NavBar from '@/components/NavBar';
-import { ThemeProvider } from '@mui/material/styles';
+"use client";
+import React, { Suspense, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { useSelector, useDispatch } from "react-redux";
-import { darkTheme, lightTheme } from './theme';
-import { CssBaseline, Grid } from '@mui/material';
-import { payeeData } from '../slices/payeeSlice';
-import { invoicesData } from '../slices/invoicesSlice';
-import axios from 'axios'
-import ShowAllInvoices from './showAllInvoices/page';
+import { CssBaseline, Grid } from "@mui/material";
+
+import NavBar from "@/components/NavBar";
+import ShowAllInvoices from "./showAllInvoices/page";
+
+import { darkTheme, lightTheme } from "./theme";
+
+import { payeeData } from "../slices/payeeSlice";
+import { invoicesData } from "../slices/invoicesSlice";
+
+import { fetchInvoices, fetchPayees } from "./services/api";
 
 const HomePage = () => {
-  const Mode = useSelector((state) => state.theme.Darkmode)
+  const Mode = useSelector((state) => state.theme.Darkmode);
   const router = useRouter();
   const dispatch = useDispatch();
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [payeesResponse, invoicesResponse] = await Promise.all([
+          fetchPayees(),
+          fetchInvoices(),
+        ]);
 
-    async function fetchPayees() {
+        dispatch(payeeData(payeesResponse.data));
+        dispatch(invoicesData(invoicesResponse.data));
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+        setError("Failed to load application data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const response = await axios.get('/api/create/newPayee')
-      // console.log(response.data)
-      dispatch(payeeData(response.data))
-    }
-    fetchPayees();
-    async function fetchInvoices() {
+    fetchData();
 
-      const response = await axios.get('/api/create/newInvoice')
-      // console.log(response.data)
-      dispatch(invoicesData(response.data))
-
-    }
-    fetchInvoices();
     return () => {
-      fetchPayees();
-      fetchInvoices()
-    }
-  }, [])
+      // Cleanup if needed
+    };
+  }, [dispatch]);
 
-  return (<ThemeProvider theme={Mode ? darkTheme : lightTheme}>
-    <CssBaseline />
-    <Box sx={{ width: '100%', height: '100vh', p: 0, m: 0 }}>
-      <NavBar />
-      <Typography variant="h1" component='h1' sx={{ textAlign: 'center', fontSize: '4rem', padding: '5%', color: '#5d4d66' }}>Welcome to Invoice</Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+  if (loading) {
+    return (
+      <ThemeProvider theme={Mode ? darkTheme : lightTheme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <CircularProgress size={60} />
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
-          <Button variant="contained" color="primary" sx={{ height: '100px', width: '250px', display: 'block', margin: "10px auto" }} onClick={() => router.push('/create/newInvoice')}>
-            Create New Invoice
-          </Button>
-          <Button variant="contained" color="primary" sx={{ height: '100px', width: '250px', display: 'block', margin: "10px auto" }} onClick={() => router.push('/create/newPayee')}>
-            Create New Payee
-          </Button>
-        </Grid>
-        <Grid item xs={12} md={8}>
+  if (error) {
+    return (
+      <ThemeProvider theme={Mode ? darkTheme : lightTheme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <Alert severity="error" sx={{ width: "50%" }}>
+            {error}
+          </Alert>
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
-          <Suspense fallback={null}>
-            <ShowAllInvoices />
-          </Suspense>
-        </Grid>
-      </Grid>
-    </Box></ThemeProvider>
-  )
-}
+  return (
+    <ThemeProvider theme={Mode ? darkTheme : lightTheme}>
+      <CssBaseline />
+      <Box sx={{ width: "100%", minHeight: "100vh", p: 0, m: 0 }}>
+        <NavBar />
+
+        <Box sx={{ width: "100%", px: { xs: 2, md: 4 }, py: 4 }}>
+          <Typography
+            variant="h1"
+            component="h1"
+            sx={{
+              textAlign: "center",
+              fontSize: { xs: "2.5rem", md: "4rem" },
+              py: 4,
+              color: "primary.main",
+              fontWeight: 700,
+            }}
+          >
+            Invoice Management System
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 4,
+              maxWidth: 1600,
+              mx: "auto",
+            }}
+          >
+            {/* Action Buttons Column - Fixed Width */}
+            <Box
+              sx={{
+                width: { xs: "100%", md: 300 },
+                flexShrink: 0,
+              }}
+            >
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    height: 100,
+                    width: "100%",
+                    fontSize: "1.1rem",
+                    boxShadow: 2,
+                    "&:hover": { boxShadow: 4 },
+                  }}
+                  onClick={() => router.push("/create/newInvoice")}
+                >
+                  Create New Invoice
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{
+                    height: 100,
+                    width: "100%",
+                    fontSize: "1.1rem",
+                    boxShadow: 2,
+                    "&:hover": { boxShadow: 4 },
+                  }}
+                  onClick={() => router.push("/create/newPayee")}
+                >
+                  Add New Payee
+                </Button>
+              </Box>
+            </Box>
+
+            {/* Invoice List - Takes remaining space */}
+            <Box
+              sx={{
+                flexGrow: 1,
+                width: "100%",
+                minWidth: 0, // Prevents overflow
+              }}
+            >
+              <Suspense
+                fallback={
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", py: 4 }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                }
+              >
+                <ShowAllInvoices />
+              </Suspense>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+};
 
 export default HomePage;
